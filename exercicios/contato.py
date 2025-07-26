@@ -16,9 +16,13 @@ class Contato:
     def get_nasc(self):
         return self.__nasc
     def set_nome(self, n):
+        if n == "": raise ValueError("Nome não pode ser vazio.")
         self.__nome = n
     def get_nome(self):
         return self.__nome
+    def set_id(self, i):
+        if i < 0: raise ValueError("ID não pode ser negativo.")
+        self.__id = i
     def get_id(self):
         return self.__id 
     def set_email(self, e):
@@ -28,7 +32,7 @@ class Contato:
     def set_fone(self, f):
         self.__fone = f
     def __str__(self):
-        return f"{self.__id} - {self.__nome} - {self.__email} - {self.__fone} - {self.__nasc.strftime("%d/%m/%Y")}"
+        return f"{self.__id} - {self.__nome} - {self.__email} - {self.__fone} - {self.__nasc.strftime('%d/%m/%Y')}"
     def dict1(self):
         return {
             "id": self.__id,
@@ -67,6 +71,7 @@ class ContatoUI:
     
     @classmethod
     def inserir(cls):
+        id = int(input("Informe o ID: "))
         nome = input("Informe o nome: ")
         email = input("Informe o e-mail: ")
         fone = input("Informe o fone: ")
@@ -75,9 +80,9 @@ class ContatoUI:
             if c.get_email() == email:
                 print("Email já cadastrado. Digite novamente")
                 return
-        id = 1
-        for c in cls.__contatos:
-            id += 1
+            if c.get_id() == id:
+                print("ID já cadastrado. Digite novamente")
+                return
         c = Contato(id, nome, email, fone, nasc)
         cls.__contatos.append(c)
 
@@ -89,16 +94,26 @@ class ContatoUI:
             print(c)
 
     @classmethod
-    def listar_id(cls, id):
+    def listar_id(cls):
+        id = int(input("Informe o id do contato: "))
         for c in cls.__contatos:
-            if c.get_id() == id: return c
+            if c.get_id() == id: 
+                print(c)
+                return
         return None    
+    
+    @classmethod
+    def buscar_id(cls, id):
+        for c in cls.__contatos:
+            if c.get_id() == id:
+                return c
+        return None
 
     @classmethod
     def atualizar(cls):
         cls.listar()
-        id = int(input("Informe o id do contato a ser atualizado: "))
-        c = cls.listar_id(id)
+        id = int(input("Informe o id do contato: "))
+        c = cls.buscar_id(id)
         if c == None: 
             print("Esse contato não existe")
         else:
@@ -113,8 +128,8 @@ class ContatoUI:
     @classmethod
     def excluir(cls):
         cls.listar()
-        id = int(input("Informe o id do contato a ser excluído: "))
-        c = cls.listar_id(id)
+        id = int(input("Informe o id do contato: "))
+        c = cls.buscar_id(id)
         if c == None: 
             print("Esse contato não existe")
         else: 
@@ -144,7 +159,7 @@ class ContatoUI:
             for obj in contatos_json:
                 c = Contato.dict2(obj)
                 cls.__contatos.append(c)
-        print("Contatos carregados com sucesso!")
+        print("Contatos carregados")
 
     @classmethod
     def salvar(cls, nome_arq="contatos.json"):
@@ -153,7 +168,7 @@ class ContatoUI:
             lista.append(c.dict1())
         with open(nome_arq, mode="w") as arquivo:
             json.dump(lista, arquivo)
-        print("Contatos salvos com sucesso!")
+        print("Contatos salvos")
 
 
 ContatoUI.main()
